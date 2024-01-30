@@ -8,25 +8,26 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { AutoComplete } from "primereact/autocomplete";
+import { InputText } from 'primereact/inputtext';
 import { InputMask } from "primereact/inputmask";
 import { Dialog } from 'primereact/dialog';
 import { InputNumber } from 'primereact/inputnumber'
 import { Toast } from 'primereact/toast';
 
 
-import { wirebreak_search, wirebreak_group } from "../../../api/kcvl"
+import { wirebreak_search, wirebreak_group, wirebreak_newsave, wirebreak_editsave, wirebreak_cancelYN } from "../../../api/kcvl"
 
 const DataEmpty = {
-    "wbID": 'X',
+    "wbID": '',
     "wbDate": '',
     "Company": '',
     "BPW": "",
     "Factory": "",
     "Customer": "",
     "Construction": "",
-    "NoWireBreak": "",
-    "ProdQty": "",
-    "WireBreak": "",
+    "NoWireBreak": 0,
+    "ProdQty": 0,
+    "WireBreak": 0,
     "InputDate": "",
     "InputUser": "",
     "UpdateDate": "",
@@ -39,7 +40,6 @@ const WireBreakEntry = ({ YYMM }) => {
     const dt = useRef(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false)
-    const [submitted, setSubmitted] = useState(false)
     const [selectedRow, setSelectedRow] = useState(null);
 
     const [resultDT, setResultDT] = useState([])
@@ -64,6 +64,30 @@ const WireBreakEntry = ({ YYMM }) => {
     const [itemsCustomer, setItemsCustomer] = useState([]);
     const [itemsContruction, setItemsContruction] = useState([]);
 
+    const [dataDialog, setDataDialog] = useState(DataEmpty)
+    const [submitted, setSubmitted] = useState(false)
+    const [showDialog, setShowDialog] = useState(false)
+
+    const [dataDeleteDialog, setDataDeleteDialog] = useState(DataEmpty)
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+    const [dateDelete, setDateDelete] = useState()
+    const [dataDelete, setDataDelete] = useState()
+
+    function getValueOrDefault(data, key, defaultValue) {
+        return data['0']?.[key] || data[key] || defaultValue;
+    }
+
+    const getValueAutoComplete = (item) => {
+        if (typeof item === 'object' && item !== null && 'name' in item) {
+            return item.name
+        } else if (typeof item === 'string') {
+            return item
+        } else {
+            return null
+        }
+    }
+
+
     const filterByUserData = (input, data1) => {
         return data1.filter(item => {
             // Assuming input is an object with properties like date, BPW, factory, customer, construction
@@ -79,6 +103,56 @@ const WireBreakEntry = ({ YYMM }) => {
             return true;
         });
     };
+
+    const handleInputChange = (e, name) => {
+        const val = (e.target && e.target.value.trim()) || ''
+        let _dataDialogTemp = { ...dataDialog }
+        _dataDialogTemp[`${name}`] = val
+        setDataDialog(_dataDialogTemp)
+    }
+
+    const handleAutoCompleteChange = (e, name) => {
+        const val = (e.value) || ''
+        let _dataDialogTemp = { ...dataDialog }
+        _dataDialogTemp[`${name}`] = val
+        setDataDialog(_dataDialogTemp)
+    }
+
+    const handleNumberChange = (e, name) => {
+        const val = (e.value) || '0'
+        let _dataDialogTemp = { ...dataDialog }
+
+        _dataDialogTemp[`${name}`] = val
+        setDataDialog(_dataDialogTemp)
+
+        handleCalcute(_dataDialogTemp)
+    }
+
+    const handleCalcute = (temp) => {
+        let _dataDialogTemp = temp
+        let _ProdQty = temp.ProdQty
+        let _NoWireBreak = temp.NoWireBreak
+        let _WireBreak = 0
+
+        if (_ProdQty === 0 || _NoWireBreak === 0) {
+            _WireBreak = 0
+        } else if (!isNaN(_ProdQty) && !isNaN(_NoWireBreak)) {
+            _WireBreak = _NoWireBreak / _ProdQty;
+            if (!isFinite(_WireBreak)) {
+                _WireBreak = 0;
+            }
+        } else {
+            _WireBreak = 0;
+        }
+
+        _dataDialogTemp[`WireBreak`] = _WireBreak
+        setDataDialog(_dataDialogTemp)
+        // console.log('_dataDialogTemp', _dataDialogTemp)
+        // console.log('_ProdQty', _ProdQty)
+        // console.log('_NoWireBreak', _NoWireBreak)
+        // console.log('_WireBreak', _WireBreak)
+
+    }
 
     const handleLoad = () => {
         const currentDate = new Date();
@@ -127,6 +201,72 @@ const WireBreakEntry = ({ YYMM }) => {
         }
 
     }
+    const handleNewsave = async (_params) => {
+        // console.log('handleNewsave', _params)
+        try {
+            const result = await wirebreak_newsave(_params)
+            // console.log (result)
+
+            if (result.status === 200) {
+                setShowDialog(false)
+                setDataDialog(DataEmpty)
+                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Wire Break Rate & Production Saved', life: 3000 });
+            } else {
+                toast.current.show({ severity: 'error', summary: 'Warning', detail: { result }, life: 3000 });
+            }
+            handleLoad()
+
+        } catch (error) {
+            console.error('Error saving handleNewsave:', error);
+            toast.current.show({ severity: 'error', summary: 'Warning', detail: { error }, life: 3000 });
+        }
+
+    }
+
+    const handleEditsave = async (_params) => {
+        // console.log('handleNewsave', _params)
+        try {
+            const result = await wirebreak_editsave(_params)
+            // console.log (result)
+
+            if (result.status === 200) {
+                setShowDialog(false)
+                setDataDialog(DataEmpty)
+
+                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Wire Break Rate & Production Updated', life: 3000 });
+            } else {
+                toast.current.show({ severity: 'error', summary: 'Warning', detail: { result }, life: 3000 });
+            }
+            handleLoad()
+
+        } catch (error) {
+            console.error('Error saving handleEditsave:', error);
+            toast.current.show({ severity: 'error', summary: 'Warning', detail: { error }, life: 3000 });
+        }
+
+    }
+
+    const handleDeleteSave = async (_params) => {
+        try {
+            const result = await wirebreak_cancelYN(_params)
+            // console.log (result)
+
+            if (result.status === 200) {
+                setShowDeleteDialog(false)
+                setDataDeleteDialog(DataEmpty)
+
+                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Wire Break Rate & Production Deleted', life: 3000 });
+            } else {
+                toast.current.show({ severity: 'error', summary: 'Warning', detail: { result }, life: 3000 });
+            }
+            handleLoad()
+
+        } catch (error) {
+            console.error('Error saving handleDeleteSave:', error);
+            toast.current.show({ severity: 'error', summary: 'Warning', detail: { error }, life: 3000 });
+        }
+    }
+
 
     const handleFetchDataSearch = async () => {
         const _params = {
@@ -141,7 +281,7 @@ const WireBreakEntry = ({ YYMM }) => {
         try {
             setLoading(true)
             const _result = await wirebreak_search(_params)
-            console.log('handleFetchData > _result', _result)
+            // console.log('handleFetchData > _result', _result)
             setResultDT(_result.data)
 
             // if (_result.status === 200) {
@@ -281,6 +421,7 @@ const WireBreakEntry = ({ YYMM }) => {
     }
 
     const actionSearchEmpty = () => {
+
         const userInput = {};
         let myData = resultDT
         let filteredData = resultDT
@@ -295,7 +436,11 @@ const WireBreakEntry = ({ YYMM }) => {
         userInput.Customer = ''
         userInput.Construction = ''
 
+        filteredData = filterByUserData(userInput, myData);
+
         setResultDTfilter(filteredData)
+
+
     }
 
     const actionSearchFrom = (rowData) => {
@@ -319,19 +464,151 @@ const WireBreakEntry = ({ YYMM }) => {
         // actionSearchButton();
     }
 
-    const actionNew = () => {
-
-    }
 
     const actionExportCSV = () => {
         dt.current?.exportCSV();
     }
 
+    const actionNew = () => {
+
+        DataEmpty.wbID = ''
+        DataEmpty.Company = 'KCVL'
+        DataEmpty.InputUser = 'QC'
+        DataEmpty.UpdateUser = 'QC'
+
+        DataEmpty.wbDate = dateYYMMDD
+        DataEmpty.BPW = sBPW
+        DataEmpty.Factory = sFactory
+        DataEmpty.Customer = sCustomer
+        DataEmpty.Construction = sConstruction
+
+        DataEmpty.ProdQty = 0
+        DataEmpty.NoWireBreak = 0
+        DataEmpty.WireBreak = 0
+
+        // console.log('actionNew', DataEmpty)
+        // ~~~~ open dialog
+        setDataDialog(DataEmpty)
+        setSubmitted(false)
+        setShowDialog(true)
+    }
+
     const actionEdit = (rowData) => {
-        //go
+        // console.log('actionEdit', rowData)
+        setDataDialog(rowData)
+        setShowDialog(true)
+    }
+    const actionSaveDialog = () => {
+        //
+
+        // console.log ('actionSaveDialog', dataDialog)
+
+        let _wbDate = getValueOrDefault(dataDialog, 'wbDate', '')
+        let _Company = getValueOrDefault(dataDialog, 'Company', '')
+        let _BPW = getValueOrDefault(dataDialog, 'BPW', '')
+        let _Factory = getValueOrDefault(dataDialog, 'Factory', '')
+        let _Customer = getValueOrDefault(dataDialog, 'Customer', '')
+        let _Construction = getValueOrDefault(dataDialog, 'Construction', '')
+
+        let _ProdQty = getValueOrDefault(dataDialog, 'ProdQty', 0)
+        let _NoWireBreak = getValueOrDefault(dataDialog, 'NoWireBreak', 0)
+        let _WireBreak = getValueOrDefault(dataDialog, 'WireBreak', 0)
+
+        let _InputUser = 'KCVL'
+
+        if (_wbDate != '' && _BPW != '' && _Factory != '' && _Customer != '' && _Construction != '') {
+            const validDate = _wbDate.replace(/\//g, '');
+
+            if (validDate.length === 8) {
+                if (dataDialog.wbID) {
+                    //EDIT 
+                    // console.log ('actionSaveDialog: edit')
+                    const _paramEDIT = {
+                        "wbID": dataDialog.wbID,
+                        "wbDate": validDate,
+                        "Company": _Company,
+                        "BPW": _BPW,
+                        "Factory": _Factory,
+                        "Customer": _Customer,
+                        "Construction": _Construction,
+                        "NoWireBreak": _NoWireBreak,
+                        "ProdQty": _ProdQty,
+                        "WireBreak": _WireBreak,
+                        "InputUser": _InputUser
+                    }
+
+                    // console.log ('_paramEDIT', _paramEDIT)
+                    handleEditsave(_paramEDIT)
+
+                } else {
+                    //NEW 
+                    // console.log ('actionSaveDialog: new')
+                    const _paramNEW = {
+                        "wbDate": validDate,
+                        "Company": _Company,
+                        "BPW": _BPW,
+                        "Factory": _Factory,
+                        "Customer": _Customer,
+                        "Construction": _Construction,
+                        "NoWireBreak": _NoWireBreak,
+                        "ProdQty": _ProdQty,
+                        "WireBreak": _WireBreak,
+                        "InputUser": _InputUser
+                    }
+
+                    // console.log('_paramNEW', _paramNEW)
+                    handleNewsave(_paramNEW)
+                }
+            } else {
+                toast.current.show({ severity: 'error', summary: 'Warning', detail: 'Date is Empty', life: 3000 });
+            }
+
+
+        } else {
+            toast.current.show({ severity: 'error', summary: 'Warning', detail: 'Requirement Data is Empty', life: 3000 });
+        }
+    }
+    const actionCloseDialog = () => {
+        //
+        // ~~~~ open dialog
+        setShowDialog(false)
+        setSubmitted(true)
+        setDataDialog(DataEmpty)
     }
     const actionDelete = (rowData) => {
-        //go
+
+        const _tempDate = rowData.wbDate
+        const _formatDate = _tempDate.substring(6, 8) + '/' + _tempDate.substring(4, 6) + '/' + _tempDate.substring(0, 4)
+        setDateDelete(_formatDate)
+
+        const _dataDelete = {
+            "BPW": rowData.BPW,
+            "Factory": rowData.Factory,
+            "Customer": rowData.Customer,
+            "Construction": rowData.Construction,
+        }
+
+        setDataDelete(_dataDelete)
+
+        setDataDeleteDialog(rowData)
+        setShowDeleteDialog(true)
+    }
+    const actionDeleteDialog = () => {
+        let _paramDEL = {
+            "wbID": dataDeleteDialog.wbID,
+            "InputUser": 'KCVL',
+            "CancelYN" : 'Y'
+        }
+
+        // console.log ('actionDeleteDialog',_paramDEL)
+        handleDeleteSave(_paramDEL)
+
+
+        //
+    }
+    const actionCloseDeleteDialog = () => {
+        setShowDeleteDialog(false)
+        setDataDeleteDialog(DataEmpty)
     }
 
     const colDate = (rowData) => {
@@ -343,6 +620,32 @@ const WireBreakEntry = ({ YYMM }) => {
 
         return <div>{formattedDate}</div>;
     }
+
+    const colNumber = (data, decimal) => {
+        const _data = data;
+
+        if (_data === 0 || _data === "0" || _data === null) {
+            return (<div className='text-center'>-</div>);
+        } else {
+            const numberData = parseFloat(_data).toFixed(decimal);
+
+            return (<div className='text-center'>{numberData}</div>);
+        }
+    }
+
+    const dialogFooter = (
+        <React.Fragment>
+            <Button label="Cancel" icon="pi pi-times" outlined severity="secondary" onClick={actionCloseDialog} />
+            <Button label="Save" icon="pi pi-check" severity="primary" onClick={actionSaveDialog} />
+        </React.Fragment>
+    );
+    const deleteDialogFooter = (
+        <React.Fragment>
+            <Button label="No" icon="pi pi-times" outlined onClick={actionCloseDeleteDialog} />
+            <Button label="Yes" icon="pi pi-check" severity="danger" onClick={actionDeleteDialog} />
+        </React.Fragment>
+    );
+
 
     useEffect(() => {
         handleLoad();
@@ -360,20 +663,20 @@ const WireBreakEntry = ({ YYMM }) => {
                     <InputMask id='wbDate' mask="9999/99/99" slotChar="yyyy/mm/dd" placeholder="Date" value={sDate} onChange={(e)=>handleSelectChange(e,"wbDate")} autoComplete={true} />
                 </div> */}
                 <div className="field">
-                    <label htmlFor="BPW" className="p-sr-only">BPW</label>
-                    <AutoComplete id="BPW" placeholder="BPW" value={sBPW} onChange={(e) => handleSelectChange(e, "BPW")} suggestions={itemsBPW} completeMethod={autoCompleteBPW} dropdown />
+                    <label htmlFor="sBPW" className="p-sr-only">BPW</label>
+                    <AutoComplete id="sBPW" placeholder="BPW" value={sBPW} onChange={(e) => handleSelectChange(e, "BPW")} suggestions={itemsBPW} completeMethod={autoCompleteBPW} dropdown />
                 </div>
                 <div className="field">
-                    <label htmlFor="Factory" className="p-sr-only">Factory</label>
-                    <AutoComplete id="Factory" placeholder="Factory" value={sFactory} onChange={(e) => handleSelectChange(e, "Factory")} suggestions={itemsFactory} completeMethod={autoCompleteFactory} dropdown />
+                    <label htmlFor="sFactory" className="p-sr-only">Factory</label>
+                    <AutoComplete id="sFactory" placeholder="Factory" value={sFactory} onChange={(e) => handleSelectChange(e, "Factory")} suggestions={itemsFactory} completeMethod={autoCompleteFactory} dropdown />
                 </div>
                 <div className="field">
-                    <label htmlFor="Customer" className="p-sr-only">Customer</label>
-                    <AutoComplete id="Customer" placeholder="Customer" value={sCustomer} onChange={(e) => handleSelectChange(e, "Customer")} suggestions={itemsCustomer} completeMethod={autoCompleteCustomer} dropdown />
+                    <label htmlFor="sCustomer" className="p-sr-only">Customer</label>
+                    <AutoComplete id="sCustomer" placeholder="Customer" value={sCustomer} onChange={(e) => handleSelectChange(e, "Customer")} suggestions={itemsCustomer} completeMethod={autoCompleteCustomer} dropdown />
                 </div>
                 <div className="field">
-                    <label htmlFor="Construction" className="p-sr-only">Construction</label>
-                    <AutoComplete id="Construction" placeholder="Construction" value={sConstruction} onChange={(e) => handleSelectChange(e, "Construction")} suggestions={itemsContruction} completeMethod={autoCompleteContruction} dropdown />
+                    <label htmlFor="sConstruction" className="p-sr-only">Construction</label>
+                    <AutoComplete id="sConstruction" placeholder="Construction" value={sConstruction} onChange={(e) => handleSelectChange(e, "Construction")} suggestions={itemsContruction} completeMethod={autoCompleteContruction} dropdown />
                 </div>
                 <div className="field">
                     <Button icon="pi pi-search-plus" label="Filter" className="mr-1" onClick={actionSearchButton} />
@@ -412,20 +715,99 @@ const WireBreakEntry = ({ YYMM }) => {
                     <Column header="Factory" field="Factory" ></Column>
                     <Column header="Customer" field="Customer" ></Column>
                     <Column header="Construction" field="Construction" ></Column>
-                    <Column header="Prod Qty" field="ProdQty" style={{ width: '10%' }} ></Column>
-                    <Column header="No Wire Break" field="NoWireBreak" style={{ width: '10%' }}></Column>
-                    <Column header="Wire Break" field="WireBreak" style={{ width: '10%' }}></Column>
+                    <Column body={(rowData) => colNumber(rowData.ProdQty, 1)} header="Production Qty" field="ProdQty" style={{ width: '10%' }} ></Column>
+                    <Column body={(rowData) => colNumber(rowData.NoWireBreak, 0)} header="No. Wire-breakage" field="NoWireBreak" style={{ width: '10%' }}></Column>
+                    <Column body={(rowData) => colNumber(rowData.WireBreak, 2)} header="Wire-breakage" field="WireBreak" style={{ width: '10%' }}></Column>
                     <Column body={actionRowButton} exportable={false} style={{ width: '10px' }}></Column>
 
                 </DataTable>
             </div>
 
-            {/* <div className="col-12 md:col-10">
-                11
-            </div>
-            <div className="col-12 md:col-2">
-                sss
-            </div> */}
+            {/* ################# RECORD DIALOG ################# */}
+            <Dialog header="Record : Wire Break Rate & Production" visible={showDialog} onHide={actionCloseDialog} footer={dialogFooter} modal maximizable style={{ width: '55vw' }} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
+                <div className="p-fluid">
+                    <div className="field grid">
+                        <label htmlFor="wbDate" className="col-12 mb-2 md:col-3 md:mb-0">Date : </label>
+                        <div className="col-12 md:col-9">
+                            <InputMask id="wbDate" mask="9999/99/99" placeholder="yyyy/mm/dd" value={dataDialog.wbDate} required className={classNames({ 'p-invalid': !dataDialog.wbDate || dataDialog.wbDate.length < 8 })} onChange={(e) => handleInputChange(e, 'wbDate')} />
+                        </div>
+                    </div>
+                    <div className="field grid">
+                        <label htmlFor="BPW" className="col-12 mb-2 md:col-3 md:mb-0">BPW : </label>
+                        <div className="col-12 md:col-9">
+                            <AutoComplete id="BPW" placeholder="BPW" value={dataDialog.BPW} required className={classNames({ 'p-invalid': !dataDialog.BPW })} onChange={(e) => handleInputChange(e, "BPW")} suggestions={itemsBPW} completeMethod={autoCompleteBPW} dropdown />
+                        </div>
+                    </div>
+                    <div className="field grid">
+                        <label htmlFor="Factory" className="col-12 mb-2 md:col-3 md:mb-0">Factory : </label>
+                        <div className="col-12 md:col-9">
+                            <AutoComplete id="Factory" placeholder="Factory" value={dataDialog.Factory} required className={classNames({ 'p-invalid': !dataDialog.Factory })} onChange={(e) => handleInputChange(e, "Factory")} suggestions={itemsFactory} completeMethod={autoCompleteFactory} dropdown />
+                        </div>
+                    </div>
+                    <div className="field grid">
+                        <label htmlFor="Customer" className="col-12 mb-2 md:col-3 md:mb-0">Customer : </label>
+                        <div className="col-12 md:col-9">
+                            <AutoComplete id="Customer" placeholder="Customer" value={dataDialog.Customer} required className={classNames({ 'p-invalid': !dataDialog.Customer })} onChange={(e) => handleInputChange(e, "Customer")} suggestions={itemsCustomer} completeMethod={autoCompleteCustomer} dropdown />
+                        </div>
+                    </div>
+                    <div className="field grid">
+                        <label htmlFor="Construction" className="col-12 mb-2 md:col-3 md:mb-0">Construction : </label>
+                        <div className="col-12 md:col-9">
+                            <AutoComplete id="Construction" placeholder="Construction" value={dataDialog.Construction} required className={classNames({ 'p-invalid': !dataDialog.Construction })} onChange={(e) => handleInputChange(e, "Construction")} suggestions={itemsContruction} completeMethod={autoCompleteContruction} dropdown />
+                        </div>
+                    </div>
+                    <div className="field grid">
+                        <label htmlFor="ProdQty" className="col-12 mb-2 md:col-3 md:mb-0">Production Qty : </label>
+                        <div className="col-12 md:col-9">
+                            <InputNumber id="ProdQty" value={dataDialog.ProdQty} onValueChange={(e) => handleNumberChange(e, 'ProdQty')} minFractionDigits={1} />
+                        </div>
+                    </div>
+                    <div className="field grid">
+                        <label htmlFor="NoWireBreak" className="col-12 mb-2 md:col-3 md:mb-0">No. Wire-breakage : </label>
+                        <div className="col-12 md:col-9">
+                            <InputNumber id="NoWireBreak" value={dataDialog.NoWireBreak} onValueChange={(e) => handleNumberChange(e, 'NoWireBreak')} minFractionDigits={0} />
+                        </div>
+                    </div>
+                    <div className="field grid">
+                        <label htmlFor="WireBreak" className="col-12 mb-2 md:col-3 md:mb-0">Wire-breakage : </label>
+                        <div className="col-12 md:col-9">
+                            <InputNumber id="WireBreak" value={dataDialog.WireBreak} onValueChange={(e) => handleNumberChange(e, 'WireBreak')} minFractionDigits={2} disabled />
+                        </div>
+                    </div>
+
+                </div>
+
+                {/**/}
+                {/* <div className="formgrid grid">
+                    <div className="p-fluid">
+                        <label htmlFor="name3" className="col-4">Name</label>
+                        <div className="col-8">
+                            <InputText id="name3" type="text" />
+                        </div>
+                    </div> */}
+                {/* <div className="field col-6">
+                        <div className="flex flex-column">
+                            <label htmlFor="wwtDate">Date*</label>
+                            <InputMask id="wwtDate" mask="9999/99/99" placeholder="yyyy/mm/dd" value={dataDialog.wwtDate} required className={classNames({ 'p-invalid': !dataDialog.wwtDate || dataDialog.wwtDate.length < 8 })} onChange={(e) => handleInputChange(e, 'wwtDate')} />
+                        </div>
+                    </div> */}
+                {/* </div> */}
+            </Dialog>
+
+            {/* ################# SINGLE DELETE DIALOG ################# */}
+            <Dialog visible={showDeleteDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Delete Record" modal footer={deleteDialogFooter} onHide={actionCloseDeleteDialog}>
+                <div className="confirmation-content">
+                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                    {dataDeleteDialog && <span>Are you sure to delete this information ? </span>}
+                    <hr />
+                    {dataDeleteDialog && <span>Date : <strong>{dateDelete}</strong></span>}<br />
+                    {dataDelete && <span>BPW : <strong>{dataDelete.BPW}</strong></span>}<br />
+                    {dataDelete && <span>Factory : <strong>{dataDelete.Factory}</strong></span>}<br />
+                    {dataDelete && <span>Customer : <strong>{dataDelete.Customer}</strong></span>}<br />
+                    {dataDelete && <span>Construction : <strong>{dataDelete.Construction}</strong></span>}<br />
+                </div>
+            </Dialog>
+
         </div>
     )
 }

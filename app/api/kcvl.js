@@ -155,6 +155,56 @@ export async function wirebreak_yearly(params) {
   }
 }
 
+export async function wirebreak_newsave(params) {
+  // console.log ('wirebreak_newsave',params)
+  try {
+    const res = await axios.post(dev2 + "wirebreak/new", {
+      timeout: 5000,
+      params: {
+        udate: Date.now(),
+        ...params
+      },
+    });
+    return res;
+    // console.log(res);
+  } catch (error) {
+    return error;
+  }
+}
+export async function wirebreak_editsave(params) {
+  // console.log ('wirebreak_newsave',params)
+  try {
+    const res = await axios.post(dev2 + "wirebreak/edit", {
+      timeout: 5000,
+      params: {
+        udate: Date.now(),
+        ...params
+      },
+    });
+    return res;
+    // console.log(res);
+  } catch (error) {
+    return error;
+  }
+}
+
+export async function wirebreak_cancelYN(params) {
+  // console.log ('wirebreak_newsave',params)
+  try {
+    const res = await axios.post(dev2 + "wirebreak/cancelYN", {
+      timeout: 5000,
+      params: {
+        udate: Date.now(),
+        ...params
+      },
+    });
+    return res;
+    // console.log(res);
+  } catch (error) {
+    return error;
+  }
+}
+
 export async function pdfUpload(file) {
   if (!file) {
     throw new Error('No file selected');

@@ -102,7 +102,7 @@ const WireBreakYearly = ({ YYMM }) => {
     }
 
     const handleFetchData = async (YYMM) => {
-        console.log('handleFetchData', YYMM)
+        // console.log('handleFetchData', YYMM)
         const _currentYY = YYMM.slice(0, 4)
         const _year = parseInt(_currentYY, 10)
 
@@ -123,7 +123,7 @@ const WireBreakYearly = ({ YYMM }) => {
             const _result = await wirebreak_yearly(_paramsYY)
             setResultDT(_result.data)
 
-            console.log(_result.data)
+            // console.log(_result.data)
 
             if (_resultYYMM.data.length > 0) {
                 const tblALL_filter = filterData(_result.data, _resultYYMM.data)

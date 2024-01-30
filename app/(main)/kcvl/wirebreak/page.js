@@ -33,6 +33,7 @@ const WireBreakPage = () => {
 
         setYYMM(formattedDate)
         // handleFetchData(formattedDate)
+        
     }
     const handleKeyPress = (e) => {
         // console.log('handleKeyPress', e);
