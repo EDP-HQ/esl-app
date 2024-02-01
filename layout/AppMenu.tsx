@@ -15,23 +15,24 @@ const AppMenu = () => {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
         },
-        {
-            label: 'Machine',
-            items: [
-                { label: 'Machine Running Status', icon: 'pi pi-fw pi-eye', to: '/kcvl/mratio' }
-            ]
-        },
+        // {
+        //     label: 'Machine',
+        //     items: [
+        //         { label: 'Machine Running Status', icon: 'pi pi-fw pi-eye', to: '/kcvl/mratio' }
+        //     ]
+        // },
         {
             label: 'Monitoring',
             items: [
-                { label: 'Monitor 1', icon: 'pi pi-fw pi-eye', to: '/kcvl/monitor1' },
-                { label: 'Monitor 2', icon: 'pi pi-fw pi-eye', to: '/kcvl/monitor2' },
-                { label: 'Monitor 3', icon: 'pi pi-fw pi-eye', to: '/kcvl/monitor3' },
-                { label: 'Monitor 4', icon: 'pi pi-fw pi-eye', to: '/kcvl/monitor4' },
+                { label: 'Wire Break Rate & Production', icon: 'pi pi-fw pi-chart-bar', to: '/kcvl/monitor0' },
+                { label: 'Cord Type Check', icon: 'pi pi-fw pi-chart-bar', to: '/kcvl/monitor1' },
+                { label: 'TWBN-WRCP Tool', icon: 'pi pi-fw pi-chart-bar', to: '/kcvl/monitor2' },
+                { label: 'FD Tool', icon: 'pi pi-fw pi-chart-bar', to: '/kcvl/monitor3' },
+                { label: 'LLE', icon: 'pi pi-fw pi-chart-bar', to: '/kcvl/monitor4' },
             ]
         },
         {
-            label: 'QC Upload Data',
+            label: 'QC Data',
             items: [
                 { label: 'Wire Break Rate & Production', icon: 'pi pi-fw pi-check-square', to: '/kcvl/wirebreak' },
                 { label: 'Cord Type Check', icon: 'pi pi-fw pi-check-square', to: '/kcvl/cordtype' },

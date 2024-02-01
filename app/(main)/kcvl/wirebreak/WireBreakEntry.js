@@ -326,7 +326,6 @@ const WireBreakEntry = ({ YYMM }) => {
         }
 
     }
-
     const handleSelectChange = (e, sType) => {
         if (sType === "wbDate") {
             setSDate(e.value)
@@ -340,7 +339,6 @@ const WireBreakEntry = ({ YYMM }) => {
             setSConstruction(e.value)
         }
     }
-
     const autoCompleteBPW = (event) => {
         if (!uniqueBPW || !Array.isArray(uniqueBPW)) {
             return;
@@ -384,7 +382,6 @@ const WireBreakEntry = ({ YYMM }) => {
         _items = event.query ? _items.filter(item => item.includes(event.query)) : _items;
         setItemsContruction(_items);
     }
-
     const actionRowButton = (rowData) => {
         return (
             <React.Fragment>
@@ -394,7 +391,6 @@ const WireBreakEntry = ({ YYMM }) => {
             </React.Fragment>
         );
     };
-
     const actionSearchButton = () => {
         // handleFetchData(YYMM)
         const userInput = {};
@@ -419,7 +415,6 @@ const WireBreakEntry = ({ YYMM }) => {
             setResultDTfilter(filteredData)
         }
     }
-
     const actionSearchEmpty = () => {
 
         const userInput = {};
@@ -442,7 +437,6 @@ const WireBreakEntry = ({ YYMM }) => {
 
 
     }
-
     const actionSearchFrom = (rowData) => {
         const userInput = {};
         let myData = resultDT
@@ -463,8 +457,6 @@ const WireBreakEntry = ({ YYMM }) => {
 
         // actionSearchButton();
     }
-
-
     const actionExportCSV = () => {
         dt.current?.exportCSV();
     }
@@ -610,7 +602,6 @@ const WireBreakEntry = ({ YYMM }) => {
         setShowDeleteDialog(false)
         setDataDeleteDialog(DataEmpty)
     }
-
     const colDate = (rowData) => {
         const _wbDate = rowData.wbDate
         let year = _wbDate.substring(0, 4);
@@ -620,7 +611,6 @@ const WireBreakEntry = ({ YYMM }) => {
 
         return <div>{formattedDate}</div>;
     }
-
     const colNumber = (data, decimal) => {
         const _data = data;
 
@@ -632,7 +622,6 @@ const WireBreakEntry = ({ YYMM }) => {
             return (<div className='text-center'>{numberData}</div>);
         }
     }
-
     const dialogFooter = (
         <React.Fragment>
             <Button label="Cancel" icon="pi pi-times" outlined severity="secondary" onClick={actionCloseDialog} />
