@@ -7,7 +7,7 @@ const DashboardPage = () => {
         <div className="grid">
             <div className="col-12">
                 <div className="card">
-                    <h5>Welcome</h5>
+                    
                     <Image
                         priority={true}
                         alt="kiswire-vietnam"
@@ -20,7 +20,7 @@ const DashboardPage = () => {
                             width: "100%",
                             height: "auto",
                         }}
-                    />
+                    /><h5>Welcome</h5>
                 </div>
             </div>
         </div>

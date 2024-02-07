@@ -1,8 +1,8 @@
 import axios from "axios";
 // import { error } from "console";
 const url1 = "http://194.1.141.10:3200/demo1";
-const url2 = "http://194.1.31.8:3200/";
-const dev2 = "http://194.1.141.51:3200/";
+const dev2 = "http://194.1.31.8:3200/";
+const dev2local = "http://194.1.141.51:3200/";
 
 // export async function getd14(vcode) {
 //   try {
