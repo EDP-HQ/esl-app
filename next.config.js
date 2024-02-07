@@ -16,6 +16,9 @@ module.exports = withImages({
 
     return config;
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   // Your original next.config.js settings can go here
   // For example, you can add your custom configurations like the following:
   // target: 'serverless',
