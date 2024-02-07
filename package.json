@@ -1,6 +1,6 @@
 {
   "name": "kcvl-app-v2",
-  "version": "10.1.0-Prototype",
+  "version": "1.24.1-Prototype",
   "private": true,
   "scripts": {
     "dev": "next dev -p 8088",
