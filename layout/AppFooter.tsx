@@ -8,7 +8,7 @@ const AppFooter = () => {
 
     return (
         <div className="layout-footer">         
-            2022 <span className="font-smaller ml-2">@EDP Team (SEA HQ)</span>
+            2022-2024 <span className="font-smaller ml-2">@EDP Team (SEA HQ)</span>
         </div>
     );
 };

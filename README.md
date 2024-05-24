@@ -35,3 +35,4 @@ Only the folders related to the layout need to be moved into your project. Integ
 -> app -> (main)
 
 --> 20240524 -> add slide pdf to monitor1, monitor2, monitor3, monitor4 
+--> 20240524 -> repair the full screen pdf problem for monitor3 (beta)
