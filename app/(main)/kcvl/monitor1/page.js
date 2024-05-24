@@ -1,14 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 
-"use client";
+'use client';
 
-import React, { useState, useRef, useEffect } from "react";
-import { InputMask } from "primereact/inputmask";
+import React, { useState, useRef, useEffect } from 'react';
+import { InputMask } from 'primereact/inputmask';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
-import { TabView, TabPanel } from "primereact/tabview";
-
+import { TabView, TabPanel } from 'primereact/tabview';
 
 // Core viewer
 import { Worker, Viewer } from '@react-pdf-viewer/core';
@@ -20,28 +19,31 @@ import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 
 // Create new plugin instance
 
-import {qcfiles_search } from "../../../api/kcvl";
+import { qcfiles_search } from '../../../api/kcvl';
 
-const Monitor1 = () => {
+const Monitor3 = () => {
     const defaultLayoutPluginInstance = defaultLayoutPlugin();
-    const workerUrl = "/pdf.worker.js";
+    const workerUrl = '/pdf.worker.js';
 
     const toast = useRef(null);
     const dta = useRef(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const [YYMM, setYYMM] = useState(null);
     const [YYMMDD, setYYMMDD] = useState(null);
-    const [loading, setLoading] = useState(false)
-    const [resultDT, setResultDT] = useState([])
+    const [loading, setLoading] = useState(false);
+    const [resultDT, setResultDT] = useState([]);
     const [fGroup, setFGroup] = useState('CT'); // CT, TWBN - , FD, LLE
 
+    // ####### UPGRADE FOR SLIDE SHOW PDF (24/05/2024)
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const slideshowInterval = 10000; // Interval in milliseconds (e.g., 10000 for 10 seconds)
 
     const handleKeyPress = (e) => {
         // console.log('handleKeyPress', e);
         if (e.key === 'Enter') {
-            actionSearch()
+            actionSearch();
         }
-    }
+    };
     const handleLoad = () => {
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
@@ -51,29 +53,28 @@ const Monitor1 = () => {
         // const adjustMonth = '11'
         const formattedYYMM = `${currentYear}${currentMonth}`;
         const formattedYYMMDD = `${currentYear}${currentMonth}${currentDay}`;
-        setYYMM(formattedYYMM)
-        setYYMMDD(formattedYYMMDD)
+        setYYMM(formattedYYMM);
+        setYYMMDD(formattedYYMMDD);
 
         // loading 1st data
-        handleFetchData(formattedYYMM)
-    }
+        handleFetchData(formattedYYMM);
+    };
 
     const handleFetchData = async (todate) => {
-        setLoading(true)
+        setLoading(true);
         try {
             if (todate && todate.length === 6) {
                 //  console.log ('1- handleFetchData' , todate)
                 const _paramsDT = {
-                    "ToDate": todate,
-                    "fileGroup": fGroup,
-                    "CancelYN": 'N'
-                }
-                const _result = await qcfiles_search(_paramsDT)
-                console.log('_result', _result.data)
+                    ToDate: todate,
+                    fileGroup: fGroup,
+                    CancelYN: 'N'
+                };
+                const _result = await qcfiles_search(_paramsDT);
+                console.log('_result', _result.data);
 
                 if (_result.status === 200) {
-                    setResultDT(_result.data)
-
+                    setResultDT(_result.data);
                 }
             } else {
                 // setResultDT([])
@@ -82,60 +83,110 @@ const Monitor1 = () => {
             console.error('handleFetchData ', error);
             toast.current.show({ severity: 'error', summary: 'Warning', detail: { error }, life: 3000 });
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     const actionSearch = () => {
         let myDate = YYMM.replace('/', '');
-        setYYMM(myDate)
-        handleFetchData(myDate)
-    }
-
+        setYYMM(myDate);
+        handleFetchData(myDate);
+    };
 
     useEffect(() => {
-        handleLoad()
+        handleLoad();
     }, []);
+
+    // ####### UPGRADE FOR SLIDE SHOW PDF (24/05/2024)
+    useEffect(() => {
+        if (resultDT.length > 1) {
+            const interval = setInterval(() => {
+                setCurrentSlide((prev) => (prev < resultDT.length - 1 ? prev + 1 : 0));
+            }, slideshowInterval);
+
+            return () => clearInterval(interval);
+        }
+    }, [resultDT.length]);
+
+    const handlePrev = () => {
+        setCurrentSlide((prev) => (prev > 0 ? prev - 1 : resultDT.length - 1));
+    };
+
+    const handleNext = () => {
+        setCurrentSlide((prev) => (prev < resultDT.length - 1 ? prev + 1 : 0));
+    };
 
     return (
         <div className="grid">
             <div className="col-12">
                 <Toast ref={toast} />
                 <div className="card">
-                    <h5>Monitor : TW Cord type Check Result{'   '}
-                        <InputMask value={YYMM} onChange={(e) => { setYYMM(e.target.value); }} mask="9999/99" placeholder="Year/Month" onKeyUp={handleKeyPress} />
+                    <h5>
+                        Monitor : TW Cord type Check Result{'   '}
+                        <InputMask
+                            value={YYMM}
+                            onChange={(e) => {
+                                setYYMM(e.target.value);
+                            }}
+                            mask="9999/99"
+                            placeholder="Year/Month"
+                            onKeyUp={handleKeyPress}
+                        />
                         <Button label="Search" icon="pi pi-search" outlined onClick={actionSearch} />
                     </h5>
-                    <TabView
-                        activeIndex={activeIndex}
-                        onTabChange={(e) => setActiveIndex(e.index)}
-                    >
-                        <TabPanel header="Preview" >
+                    <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
+                        <TabPanel header="Preview">
                             {resultDT.length > 0 ? (
+                                <div>
+                                    <Worker workerUrl={workerUrl}>
+                                        <div
+                                            style={{
+                                                height: '750px',
+                                                marginLeft: 'auto',
+                                                marginRight: 'auto'
+                                            }}
+                                        >
+                                            <Viewer fileUrl={`/upload/${resultDT[currentSlide].fileUploadName}`} plugins={[defaultLayoutPluginInstance]} />
+                                        </div>
+                                    </Worker>
+                                    {resultDT.length > 1 && (
+                                        <div style={{ textAlign: 'center', marginTop: '10px' }}>
+                                            <Button onClick={handlePrev} label="Previous" />
+                                            <span style={{ margin: '0 10px' }}>
+                                                {currentSlide + 1} / {resultDT.length}
+                                            </span>
+                                            <Button onClick={handleNext} label="Next" />
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                /*
                                 resultDT.map((resultData, index) => (
                                     <Worker workerUrl={workerUrl} key={index}>
                                         <div
                                             style={{
                                                 height: '750px',
                                                 marginLeft: 'auto',
-                                                marginRight: 'auto',
+                                                marginRight: 'auto'
                                             }}
                                         >
                                             <Viewer fileUrl={`/upload/${resultData.fileUploadName}`} plugins={[defaultLayoutPluginInstance]} />
                                         </div>
                                     </Worker>
                                 ))
-                            ) : (
+                                */
                                 <div>-- No Data Found. --</div>
                             )}
                         </TabPanel>
-                        <TabPanel header="List" >
+                        <TabPanel header="List">
                             <ol>
                                 {resultDT.length > 0 ? (
                                     resultDT.map((resultData, index) => (
                                         <li key={index}>
                                             {resultData.fileName} {'    '}
-                                            <a href={'/upload/' + resultData.fileUploadName} target='_blank' title='View Files'><i className="pi pi-file-pdf"></i></a>
+                                            <a href={'/upload/' + resultData.fileUploadName} target="_blank" title="View Files">
+                                                <i className="pi pi-file-pdf"></i>
+                                            </a>
                                         </li>
                                     ))
                                 ) : (
@@ -143,13 +194,11 @@ const Monitor1 = () => {
                                 )}
                             </ol>
                         </TabPanel>
-
                     </TabView>
-
                 </div>
             </div>
         </div>
     );
 };
 
-export default Monitor1;
+export default Monitor3;
