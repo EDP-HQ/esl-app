@@ -1,6 +1,6 @@
 {
-  "name": "kcvl-app-v2",
-  "version": "1.24.2-Prototype",
+  "name": "kcvl-sfi-2024",
+  "version": "2024.0524.2-Prototype",
   "private": true,
   "scripts": {
     "dev": "next dev -p 8088",
