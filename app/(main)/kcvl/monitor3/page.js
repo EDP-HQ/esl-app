@@ -141,7 +141,7 @@ const Monitor3 = () => {
                                     <Worker workerUrl={workerUrl}>
                                         <div
                                             style={{
-                                                height: '750px',
+                                                height: '90%',
                                                 marginLeft: 'auto',
                                                 marginRight: 'auto'
                                             }}
