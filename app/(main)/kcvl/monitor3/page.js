@@ -195,7 +195,7 @@ const Monitor3 = () => {
                                                 maxHeight: '100%'
                                             }}
                                         >
-                                            <Viewer fileUrl={`/upload/${resultDT[currentSlide].fileUploadName}`} plugins={[defaultLayoutPluginInstance]} defaultScale={1.0} renderToolbar={renderToolbar} />
+                                            <Viewer fileUrl={`/upload/${resultDT[currentSlide].fileUploadName}`} plugins={[defaultLayoutPluginInstance]} defaultScale={1.0} renderToolbar={() => <div style={{ display: 'none' }}></div>}/>
                                         </div>
                                     </Worker>
                                     {resultDT.length > 1 && (
@@ -277,10 +277,7 @@ const Monitor3 = () => {
                 .navigation-buttons button, .fullscreen-buttons button {
                     margin: 0 5px;
                 }
-
-                
             `}</style>
-            
         </div>
     );
 };
