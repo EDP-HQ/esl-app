@@ -6,11 +6,16 @@
     "type": "git",
     "url": "git+https://github.com/primefaces/primeicons.git"
   },
-  "keywords": ["Icon"],
+  "keywords": [
+    "Icon"
+  ],
   "author": "PrimeTek",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/primefaces/primeicons/issues"
   },
-  "homepage": "https://github.com/primefaces/primeicons#readme"
+  "homepage": "https://github.com/primefaces/primeicons#readme",
+  "dependencies": {
+    "primeicons": "file:"
+  }
 }

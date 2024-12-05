@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from "next/image";
-const photoimg = "/img/DSC02514.PNG";
+const photoimg = "/img/ESL.jpg";
 
 const DashboardPage = () => {
     return (
@@ -10,7 +10,7 @@ const DashboardPage = () => {
                     
                     <Image
                         priority={true}
-                        alt="kiswire-vietnam"
+                        alt="ESL"
                         src={photoimg}
                         width={1600}
                         height={475}

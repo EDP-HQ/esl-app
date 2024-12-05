@@ -47,6 +47,7 @@
     },
     "dependencies": {
         "@types/react-transition-group": "^4.4.1",
+        "primereact": "file:",
         "react-transition-group": "^4.4.1"
     },
     "sideEffects": [
